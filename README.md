@@ -12,7 +12,12 @@ Martian 팀의 NestJS 프로젝트에 재활용 가능한 모듈 및 유틸리�
 
 1. GitHub 에 빈 리포지토리를 생성하고 로컬에 클론 받는다.
 
-2.
+2. 해당 디렉토리 내에서 nest 프로젝트를 생성한다.
+
+```
+$ npm i -g @nestjs/cli
+$ nest new project-name
+```
 
 ### Configuration
 
@@ -69,7 +74,7 @@ PORT=8000
 # datasource
 DB_HOST=localhost
 DB_PORT=5432
-DB_USERNAME=postgres
+DB_USERNAME=my_project
 DB_PASSWORD=asdf
 DB_DATABASE=my_project
 ```
@@ -85,23 +90,18 @@ DB_DATABASE=my_project
 1. 다음 명령어를 입력해서 컨테이너 이름은 `pg` 유저는 `postgres` 패스워드는 `asdf` 인 Docker 컨테이너를 실행한다.
 
 ```
-docker run --name pg -e POSTGRES_PASSWORD=asdf -p 5432:5432 -d postgres
+docker run --name pg -e POSTGRES_PASSWORD=asdf -e POSTGRES_DB=my_project -e POSTGRES_USER=my_project -p 5432:5432 -d postgres
 ```
 
-2. 다음 명령어를 입력해서 방금 생성한 `pg` 컨테이너에 `psql` 로 접속한다.
+2. 다음 명령어를 입력해서 방금 생성한 `pg` 컨테이너에 `psql` 로 접속할 수 있다.
 
 ```
 docker exec -it pg psql -U postgres
 ```
 
-3. `psql` 터미널에서 다음 명령어를 입력해 이름이 `my_project` 인 데이터베이스를 생성한다.
+3. (Optional) 기타 `psql` 명령어들
 
-```
-create database my_project;
-```
-
-4. (Optional) 기타 `psql` 명령어들
-
+   - `create database my_project;` - my_project DB 생성
    - `\l` - 모든 데이터베이스 나열하기
    - `\c my_project` - 이름이 `my_project` 인 데이터베이스에 연결 (특정 데이터베이스에 대해 작업하기 위해 연결함)
    - `\dt` - 연결한 데이터베이스의 모든 테이블 나열하기
