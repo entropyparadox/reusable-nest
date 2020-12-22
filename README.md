@@ -5,6 +5,10 @@ Martian 팀의 NestJS 프로젝트에 재활용 가능한 모듈 및 유틸리�
 ## Table of Contents
 
 - [Getting Started](#getting-started)
+  - [프로젝트 생성](#프로젝트-생성)
+  - [Configuration](#configuration)
+  - [Database](#database)
+- [Authentication](#authentication)
 
 ## Getting Started
 
@@ -16,7 +20,7 @@ Martian 팀의 NestJS 프로젝트에 재활용 가능한 모듈 및 유틸리�
 
 ```
 $ npm i -g @nestjs/cli
-$ nest new project-name
+$ nest new .
 ```
 
 ### Configuration
@@ -106,3 +110,187 @@ docker exec -it pg psql -U postgres
    - `\c my_project` - 이름이 `my_project` 인 데이터베이스에 연결 (특정 데이터베이스에 대해 작업하기 위해 연결함)
    - `\dt` - 연결한 데이터베이스의 모든 테이블 나열하기
    - `\q` - `psql` 종료
+
+### reusable-nest 세팅
+
+1. GitHub [Settings](https://github.com/settings/profile) > [Developer settings](https://github.com/settings/apps) > [Personal access tokens](https://github.com/settings/tokens) 에서 Generate new token 버튼을 눌러 토큰을 생성한다. 토큰을 생성할 때 `write:packages` 체크박스를 선택한다. 생성된 토큰을 클립보드에 복사한다.
+
+2. `~/.npmrc` 파일에 다음 내용을 추가한다. `TOKEN` 자리에 복사한 토큰을 넣는다.
+
+```
+//npm.pkg.github.com/:_authToken=TOKEN
+```
+
+3. 다음 명령어를 입력하여 로그인한다. 로그인할때 패스워드는 복사한 토큰을 그대로 사용한다.
+
+```
+npm login --scope=@entropyparadox --registry=https://npm.pkg.github.com
+```
+
+4. 다음 명령어를 이용하여 패키지를 설치한다.
+
+```
+npm i @entropyparadox/reusable-nest
+```
+
+## Authentication
+
+1. `UsersModule` 에 `AuthModule` 을 추가한다.
+
+```
+import { AuthModule } from '@entropyparadox/reusable-nest';
+import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
+
+@Module({
+  imports: [
+    AuthModule.register(UsersModule, UsersService),
+  ],
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+```
+
+2. `User` Entity 에서 `AuthUser` 를 상속받는다.
+
+```
+import { AuthUser } from '@entropyparadox/reusable-nest';
+import { ObjectType, Field } from '@nestjs/graphql';
+import { Entity, Column } from 'typeorm';
+
+@ObjectType()
+@Entity()
+export class User extends AuthUser {
+  @Field()
+  @Column('text', { nullable: false })
+  name: string;
+}
+```
+
+`AuthUser` 의 프로퍼티
+
+- id: number;
+- email: string;
+- password: string;
+- role: string;
+- isActive: boolean;
+- isAdmin: boolean;
+- createdAt: Date;
+- updatedAt: Date;
+
+3. `UsersService` 에서 `AuthUsersSerivice` 를 구현한다.
+
+```
+import { AuthUsersService } from '@entropyparadox/reusable-nest';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateUserInput } from './dto/create-user.input';
+import { UpdateUserInput } from './dto/update-user.input';
+import { User } from './user.entity';
+
+@Injectable()
+export class UsersService implements AuthUsersService {
+  constructor(
+    @InjectRepository(User)
+    private repository: Repository<User>,
+  ) {}
+
+  create(createUserInput: CreateUserInput) {
+    return this.repository.save(createUserInput);
+  }
+
+  findAll() {
+    return this.repository.find();
+  }
+
+  find(filter: any) {
+    return this.repository.find(filter);
+  }
+
+  findOne(filter: any) {
+    return this.repository.findOne(filter);
+  }
+
+  findById(id: number) {
+    return this.repository.findOne(id);
+  }
+
+  update(id: number, updateUserInput: UpdateUserInput) {
+    return this.repository.update(id, updateUserInput);
+  }
+
+  async remove(id: number) {
+    await this.repository.delete(id);
+  }
+}
+```
+
+4. `UsersResolver` 예시
+
+```
+import {
+  AuthResponse,
+  AuthService,
+  CurrentUser,
+  GqlLocalAuthGuard,
+  Public,
+} from '@entropyparadox/reusable-nest';
+import { UseGuards } from '@nestjs/common';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { CreateUserInput } from './dto/create-user.input';
+import { UpdateUserInput } from './dto/update-user.input';
+import { User } from './user.entity';
+import { UsersService } from './users.service';
+
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(
+    private readonly service: UsersService,
+    private readonly authService: AuthService,
+  ) {}
+
+  @Public()
+  @Mutation(() => AuthResponse)
+  signup(@Args('input') createUserInput: CreateUserInput) {
+    return this.authService.signup(createUserInput);
+  }
+
+  @Public()
+  @Mutation(() => AuthResponse)
+  @UseGuards(GqlLocalAuthGuard)
+  login(
+    @Args('email') email: string,
+    @Args('password') password: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.authService.login(user.id);
+  }
+
+  @Query(() => [User])
+  users() {
+    return this.service.findAll();
+  }
+
+  @Query(() => User)
+  user(@Args('id', { type: () => Int }) id: number) {
+    return this.service.findById(id);
+  }
+
+  @Query(() => User)
+  me(@CurrentUser() user: User) {
+    return user;
+  }
+
+  @Mutation(() => User)
+  updateUser(@Args('input') updateUserInput: UpdateUserInput) {
+    return this.service.update(updateUserInput.id, updateUserInput);
+  }
+
+  @Mutation(() => User)
+  removeUser(@Args('id', { type: () => Int }) id: number) {
+    return this.service.remove(id);
+  }
+}
+```
