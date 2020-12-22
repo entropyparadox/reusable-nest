@@ -1,18 +1,9 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  CreateDateColumn,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Column, Index } from 'typeorm';
+import { BaseModel } from '../base-model.entity';
 
 @ObjectType({ isAbstract: true })
-export class AuthUser {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id!: number;
-
+export class AuthUser extends BaseModel {
   @Field(() => String)
   @Column('text', { nullable: false })
   @Index({ unique: true })
@@ -33,14 +24,4 @@ export class AuthUser {
   @Field(() => Boolean)
   @Column('boolean', { default: false })
   isAdmin!: boolean;
-
-  @Field(() => Date)
-  @Column('timestamp')
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @Field(() => Date)
-  @Column('timestamp')
-  @UpdateDateColumn()
-  updatedAt!: Date;
 }
