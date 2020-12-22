@@ -201,28 +201,12 @@ export class UsersService implements AuthUsersService {
     return this.repository.save(createUserInput);
   }
 
-  findAll() {
-    return this.repository.find();
-  }
-
-  find(filter: any) {
-    return this.repository.find(filter);
-  }
-
-  findOne(filter: any) {
-    return this.repository.findOne(filter);
-  }
-
   findById(id: number) {
     return this.repository.findOne(id);
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return this.repository.update(id, updateUserInput);
-  }
-
-  async remove(id: number) {
-    await this.repository.delete(id);
+  findByEmail(email: string) {
+    return this.repository.findOne({ where: { email } });
   }
 }
 ```

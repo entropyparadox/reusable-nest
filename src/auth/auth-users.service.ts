@@ -6,5 +6,5 @@ export interface AuthUsersService {
 
   findById(id: number): Promise<AuthUser>;
 
-  findOne(filter: any): Promise<AuthUser>;
+  findByEmail(email: string): Promise<AuthUser>;
 }
