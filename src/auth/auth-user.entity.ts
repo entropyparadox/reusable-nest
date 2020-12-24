@@ -1,16 +1,15 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Index } from 'typeorm';
+import { Column } from 'typeorm';
 import { BaseModel } from '../base-model.entity';
 
 @ObjectType({ isAbstract: true })
 export class AuthUser extends BaseModel {
   @Field(() => String)
-  @Column('text', { nullable: false })
-  @Index({ unique: true })
+  @Column('text', { unique: true })
   email!: string;
 
   @Field(() => String)
-  @Column('text', { nullable: false })
+  @Column('text')
   password!: string;
 
   @Field(() => String)
