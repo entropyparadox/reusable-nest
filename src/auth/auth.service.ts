@@ -8,6 +8,7 @@ import { AuthUsersService } from './auth-users.service';
 export interface EmailAndPassword {
   email: string;
   password: string;
+  [others: string]: any;
 }
 
 @ObjectType()
@@ -25,7 +26,7 @@ export class AuthService {
 
   async signup(user: EmailAndPassword): Promise<AuthResponse> {
     user.password = await hash(user.password, 10);
-    const { id } = await this.usersService.create(user);
+    const { id } = await this.usersService.save(user);
     return this.login(id);
   }
 
