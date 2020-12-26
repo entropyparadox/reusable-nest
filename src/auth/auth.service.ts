@@ -3,7 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { hash } from 'bcryptjs';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
-import { AuthUsersService } from './auth-users.service';
+import { IReusableUsersService } from '../reusable-users.service';
+import { AuthUser } from './auth-user.entity';
 
 export interface EmailAndPassword {
   email: string;
@@ -20,7 +21,8 @@ export class AuthResponse {
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(Provider.USERS_SERVICE) private usersService: AuthUsersService,
+    @Inject(Provider.USERS_SERVICE)
+    private usersService: IReusableUsersService<AuthUser>,
     private jwtService: JwtService,
   ) {}
 

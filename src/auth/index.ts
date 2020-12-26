@@ -1,5 +1,4 @@
 export * from './auth-user.entity';
-export * from './auth-users.service';
 export * from './auth.module';
 export * from './auth.service';
 export * from './current-user.decorator';

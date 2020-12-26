@@ -3,12 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { compare } from 'bcryptjs';
 import { Strategy } from 'passport-local';
 import { Provider } from '../enums';
-import { AuthUsersService } from './auth-users.service';
+import { IReusableUsersService } from '../reusable-users.service';
+import { AuthUser } from './auth-user.entity';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @Inject(Provider.USERS_SERVICE) private usersService: AuthUsersService,
+    @Inject(Provider.USERS_SERVICE)
+    private usersService: IReusableUsersService<AuthUser>,
   ) {
     super({ usernameField: 'email' });
   }
