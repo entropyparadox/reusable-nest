@@ -10,6 +10,7 @@ export interface IReusableService<Entity> {
   findByIds(ids: number[]): Promise<Entity[]>;
   save(data: DeepPartial<Entity>): Promise<Entity>;
   delete(id: number): Promise<DeleteResult>;
+  deleteByIds(ids: number[]): Promise<DeleteResult>;
 }
 
 export function ReusableService<Entity extends BaseModel>(
@@ -36,6 +37,10 @@ export function ReusableService<Entity extends BaseModel>(
 
     delete(id: number) {
       return this.repository.delete(id);
+    }
+
+    deleteByIds(ids: number[]) {
+      return this.repository.delete(ids);
     }
   }
   return ReusableServiceHost;

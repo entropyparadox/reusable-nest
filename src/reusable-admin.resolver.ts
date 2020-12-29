@@ -12,7 +12,12 @@ export interface IReusableAdminResolver<Service, Entity> {
   getOne(id: number): Promise<Entity | undefined>;
   getList(): Promise<Entity[]>;
   getMany(ids: number[]): Promise<Entity[]>;
-  // create(args: any): Promise<Entity>;
+  // getManyReference
+  // create(input: any): Promise<Entity>;
+  // update
+  // updateMany
+  delete(id: number): Promise<Entity>;
+  deleteMany(ids: number[]): Promise<number[]>;
 }
 
 export function ReusableAdminResolver<
@@ -45,11 +50,31 @@ export function ReusableAdminResolver<
       return this.service.findByIds(ids);
     }
 
+    // getManyReference
+
     // @Roles(BaseRole.ADMIN)
     // @Mutation(() => entity, { name: `create${entity.name}` })
-    // create(@Args() args: Entity) {
-    //   return this.service.save(args);
+    // create(@Args('input') input: CreateInput) {
+    //   return this.service.save(input);
     // }
+
+    // update
+
+    // updateMany
+
+    @Roles(BaseRole.ADMIN)
+    @Mutation(() => entity, { name: `delete${entity.name}` })
+    async delete(@Args('id') id: number) {
+      await this.service.delete(id);
+      return { id } as Entity;
+    }
+
+    @Roles(BaseRole.ADMIN)
+    @Mutation(() => [Int], { name: `delete${plural(entity.name)}ByIds` })
+    async deleteMany(@Args('ids', { type: () => [Int] }) ids: number[]) {
+      await this.service.deleteByIds(ids);
+      return ids;
+    }
   }
   return ReusableAdminResolverHost;
 }
