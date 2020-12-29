@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Column } from 'typeorm';
 import { BaseModel } from '../base-model.entity';
+import { BaseRole } from './auth.enum';
 
 @ObjectType({ isAbstract: true })
 export class AuthUser extends BaseModel {
@@ -13,7 +14,7 @@ export class AuthUser extends BaseModel {
   password!: string;
 
   @Field(() => String)
-  @Column('text', { default: 'USER' })
+  @Column('text', { default: BaseRole.USER })
   role!: string;
 
   @Field(() => Boolean)
