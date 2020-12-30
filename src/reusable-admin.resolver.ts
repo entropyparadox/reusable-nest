@@ -13,10 +13,10 @@ export interface IReusableAdminResolver<Service, Entity> {
   getList(): Promise<Entity[]>;
   getMany(ids: number[]): Promise<Entity[]>;
   // getManyReference
-  // create(input: any): Promise<Entity>;
-  // update
-  // updateMany
-  delete(id: number): Promise<Entity>;
+  create(data: string): Promise<Entity>;
+  update(id: number, data: string): Promise<Entity>;
+  updateMany(ids: number[], data: string): Promise<number[]>;
+  delete(id: number): Promise<number>;
   deleteMany(ids: number[]): Promise<number[]>;
 }
 
@@ -52,21 +52,33 @@ export function ReusableAdminResolver<
 
     // getManyReference
 
-    // @Roles(BaseRole.ADMIN)
-    // @Mutation(() => entity, { name: `create${entity.name}` })
-    // create(@Args('input') input: CreateInput) {
-    //   return this.service.save(input);
-    // }
-
-    // update
-
-    // updateMany
+    @Roles(BaseRole.ADMIN)
+    @Mutation(() => entity, { name: `create${entity.name}` })
+    create(@Args('data') data: string) {
+      return this.service.save(JSON.parse(data));
+    }
 
     @Roles(BaseRole.ADMIN)
-    @Mutation(() => entity, { name: `delete${entity.name}` })
+    @Mutation(() => entity, { name: `update${entity.name}` })
+    update(@Args('id') id: number, @Args('data') data: string) {
+      return this.service.save({ ...JSON.parse(data), id });
+    }
+
+    @Roles(BaseRole.ADMIN)
+    @Mutation(() => [Int], { name: `update${plural(entity.name)}ByIds` })
+    async updateMany(
+      @Args('ids', { type: () => [Int] }) ids: number[],
+      @Args('data') data: string,
+    ) {
+      await this.service.updateByIds(ids, JSON.parse(data));
+      return ids;
+    }
+
+    @Roles(BaseRole.ADMIN)
+    @Mutation(() => Int, { name: `delete${entity.name}` })
     async delete(@Args('id') id: number) {
       await this.service.delete(id);
-      return { id } as Entity;
+      return id;
     }
 
     @Roles(BaseRole.ADMIN)
