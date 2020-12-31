@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class DeleteReponse {
+export class DeleteResponse {
   @Field(() => Int)
   id!: number;
 }
