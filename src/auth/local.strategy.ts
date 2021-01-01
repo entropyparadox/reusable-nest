@@ -4,13 +4,13 @@ import { compare } from 'bcryptjs';
 import { Strategy } from 'passport-local';
 import { Provider } from '../enums';
 import { IReusableUsersService } from '../reusable-users.service';
-import { AuthUser } from './auth-user.entity';
+import { IAuthUser } from './auth-user.entity';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(Provider.USERS_SERVICE)
-    private usersService: IReusableUsersService<AuthUser>,
+    private usersService: IReusableUsersService<IAuthUser<any>>,
   ) {
     super({ usernameField: 'email' });
   }

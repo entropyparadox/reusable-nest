@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Provider } from '../enums';
 import { IReusableUsersService } from '../reusable-users.service';
-import { AuthUser } from './auth-user.entity';
+import { IAuthUser } from './auth-user.entity';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
 import { GqlJwtAuthGuard } from './gql-jwt-auth.guard';
@@ -16,7 +16,7 @@ import { RolesGuard } from './roles.guard';
 export class AuthModule {
   static register(
     usersModule: Type<any>,
-    usersService: Type<IReusableUsersService<AuthUser>>,
+    usersService: Type<IReusableUsersService<IAuthUser<any>>>,
   ): DynamicModule {
     return {
       module: AuthModule,

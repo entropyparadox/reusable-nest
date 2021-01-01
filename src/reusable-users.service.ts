@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { AuthUser } from './auth';
+import { IAuthUser } from './auth';
 import { IReusableService, ReusableService } from './reusable.service';
 
 export interface IReusableUsersService<Entity>
@@ -7,7 +7,7 @@ export interface IReusableUsersService<Entity>
   findByEmail(email: string): Promise<Entity | undefined>;
 }
 
-export function ReusableUsersService<Entity extends AuthUser>(
+export function ReusableUsersService<Entity extends IAuthUser<any>>(
   entity: Type<Entity>,
 ): Type<IReusableUsersService<Entity>> {
   class ReusableUsersServiceHost

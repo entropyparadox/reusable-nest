@@ -4,7 +4,7 @@ import { hash } from 'bcryptjs';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
 import { IReusableUsersService } from '../reusable-users.service';
-import { AuthUser } from './auth-user.entity';
+import { IAuthUser } from './auth-user.entity';
 
 export interface EmailAndPassword {
   email: string;
@@ -22,7 +22,7 @@ export class AuthResponse {
 export class AuthService {
   constructor(
     @Inject(Provider.USERS_SERVICE)
-    private usersService: IReusableUsersService<AuthUser>,
+    private usersService: IReusableUsersService<IAuthUser<any>>,
     private jwtService: JwtService,
   ) {}
 

@@ -3,14 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Provider } from '../enums';
 import { IReusableUsersService } from '../reusable-users.service';
-import { AuthUser } from './auth-user.entity';
+import { IAuthUser } from './auth-user.entity';
 import { jwtConstants } from './constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(Provider.USERS_SERVICE)
-    private usersService: IReusableUsersService<AuthUser>,
+    private usersService: IReusableUsersService<IAuthUser<any>>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
