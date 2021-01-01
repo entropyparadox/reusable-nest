@@ -16,12 +16,4 @@ export class AuthUser extends BaseModel {
   @Field(() => String)
   @Column('text', { default: BaseRole.USER })
   role!: string;
-
-  @Field(() => Boolean)
-  @Column('boolean', { default: true })
-  isActive!: boolean;
-
-  @Field(() => Boolean)
-  @Column('boolean', { default: false })
-  isAdmin!: boolean;
 }
