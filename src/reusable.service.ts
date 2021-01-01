@@ -1,6 +1,7 @@
 import { Type } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, In, Repository, UpdateResult } from 'typeorm';
+import { DeepPartial, DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseModel } from './base-model.entity';
 
 export interface IReusableService<Entity> {
@@ -8,8 +9,11 @@ export interface IReusableService<Entity> {
   findById(id: number): Promise<Entity | undefined>;
   findAll(): Promise<Entity[]>;
   findByIds(ids: number[]): Promise<Entity[]>;
-  save(data: any): Promise<Entity>;
-  updateByIds(ids: number[], data: any): Promise<UpdateResult>;
+  save(data: DeepPartial<Entity>): Promise<Entity>;
+  updateByIds(
+    ids: number[],
+    data: QueryDeepPartialEntity<Entity>,
+  ): Promise<UpdateResult>;
   delete(id: number): Promise<DeleteResult>;
   deleteByIds(ids: number[]): Promise<DeleteResult>;
 }
@@ -29,14 +33,14 @@ export function ReusableService<Entity extends BaseModel>(
     }
 
     findByIds(ids: number[]) {
-      return this.repository.find({ where: { id: In(ids) } });
+      return this.repository.findByIds(ids);
     }
 
-    save(data: any) {
+    save(data: DeepPartial<Entity>) {
       return this.repository.save(data);
     }
 
-    updateByIds(ids: number[], data: any) {
+    updateByIds(ids: number[], data: QueryDeepPartialEntity<Entity>) {
       return this.repository.update(ids, data);
     }
 
