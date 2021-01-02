@@ -24,7 +24,7 @@ export function AuthUser<R extends string>(
     password!: string;
 
     @Field(() => role)
-    @Column('text', { default: BaseRole.USER })
+    @Column({ type: 'enum', enum: role, default: BaseRole.USER })
     role!: R;
   }
   return AuthUserHost;
