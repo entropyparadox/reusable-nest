@@ -2,10 +2,10 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { camelCase } from 'lodash';
 import { plural } from 'pluralize';
-import { Roles } from './auth';
-import { BaseRole } from './auth/auth.enum';
-import { BaseModel } from './base-model.entity';
-import { IReusableService } from './reusable.service';
+import { Roles } from '../auth';
+import { BaseRole } from '../auth/auth.enum';
+import { BaseModel } from '../reusable/base-model.entity';
+import { IReusableService } from '../reusable/reusable.service';
 
 export interface IReusableAdminResolver<Service, Entity> {
   readonly service: Service;

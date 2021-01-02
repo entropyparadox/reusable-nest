@@ -1,7 +1,7 @@
 import { Type } from '@nestjs/common';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Column } from 'typeorm';
-import { BaseModel } from '../base-model.entity';
+import { BaseModel } from '../reusable';
 import { BaseRole } from './auth.enum';
 
 export interface IAuthUser<R> extends BaseModel {

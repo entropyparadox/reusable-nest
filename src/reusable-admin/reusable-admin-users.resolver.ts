@@ -6,31 +6,31 @@ import {
   CurrentUser,
   GqlLocalAuthGuard,
   Public,
-} from './auth';
-import { BaseModel } from './base-model.entity';
+} from '../auth';
+import { BaseModel } from '../reusable/base-model.entity';
+import { IReusableService } from '../reusable/reusable.service';
 import {
   IReusableAdminResolver,
   ReusableAdminResolver,
 } from './reusable-admin.resolver';
-import { IReusableService } from './reusable.service';
 
-export interface IReusableUsersAdminResolver<Service, Entity>
+export interface IReusableAdminUsersResolver<Service, Entity>
   extends IReusableAdminResolver<Service, Entity> {
   login(user: Entity, email: string, password: string): Promise<AuthResponse>;
   me(user: Entity): Entity;
 }
 
-export function ReusableUsersAdminResolver<
+export function ReusableAdminUsersResolver<
   Service extends IReusableService<Entity>,
   Entity extends BaseModel
 >(
   reusableService: Type<Service>,
   entity: Type<Entity>,
-): Type<IReusableUsersAdminResolver<Service, Entity>> {
+): Type<IReusableAdminUsersResolver<Service, Entity>> {
   @Resolver()
-  class ReusableUsersAdminResolverHost
+  class ReusableAdminUsersResolverHost
     extends ReusableAdminResolver(reusableService, entity)
-    implements IReusableUsersAdminResolver<Service, Entity> {
+    implements IReusableAdminUsersResolver<Service, Entity> {
     constructor(private readonly authService: AuthService) {
       super();
     }
@@ -51,5 +51,5 @@ export function ReusableUsersAdminResolver<
       return user;
     }
   }
-  return ReusableUsersAdminResolverHost;
+  return ReusableAdminUsersResolverHost;
 }

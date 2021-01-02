@@ -3,7 +3,7 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Provider } from '../enums';
-import { IReusableUsersService } from '../reusable-users.service';
+import { IReusableUsersService } from '../reusable';
 import { IAuthUser } from './auth-user.entity';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';

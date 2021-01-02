@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { compare } from 'bcryptjs';
 import { Strategy } from 'passport-local';
 import { Provider } from '../enums';
-import { IReusableUsersService } from '../reusable-users.service';
+import { IReusableUsersService } from '../reusable';
 import { IAuthUser } from './auth-user.entity';
 
 @Injectable()

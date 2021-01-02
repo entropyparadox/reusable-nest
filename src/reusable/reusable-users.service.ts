@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { IAuthUser } from './auth';
+import { IAuthUser } from '../auth';
 import { IReusableService, ReusableService } from './reusable.service';
 
 export interface IReusableUsersService<Entity>

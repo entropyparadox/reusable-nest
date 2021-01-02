@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { hash } from 'bcryptjs';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
-import { IReusableUsersService } from '../reusable-users.service';
 import { IAuthUser } from './auth-user.entity';
+import { IReusableUsersService } from '../reusable';
 
 export interface EmailAndPassword {
   email: string;
