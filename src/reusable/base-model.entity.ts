@@ -13,12 +13,10 @@ export class BaseModel {
   id!: number;
 
   @Field(() => Date)
-  @Column('timestamp')
   @CreateDateColumn()
   createdAt!: Date;
 
   @Field(() => Date)
-  @Column('timestamp')
   @UpdateDateColumn()
   updatedAt!: Date;
 }
