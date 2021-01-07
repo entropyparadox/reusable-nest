@@ -1,6 +1,14 @@
 import { Type } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, DeleteResult, Repository, UpdateResult } from 'typeorm';
+import {
+  DeepPartial,
+  DeleteResult,
+  FindConditions,
+  FindManyOptions,
+  LessThan,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseModel } from './base-model.entity';
 
@@ -14,6 +22,11 @@ export interface IReusableService<Entity> {
     ids: number[],
     data: QueryDeepPartialEntity<Entity>,
   ): Promise<UpdateResult>;
+  findByCursor(
+    first?: number,
+    after?: number,
+    where?: FindConditions<Entity>,
+  ): Promise<Entity[]>;
   delete(id: number): Promise<DeleteResult>;
   deleteByIds(ids: number[]): Promise<DeleteResult>;
 }
@@ -34,6 +47,21 @@ export function ReusableService<Entity extends BaseModel>(
 
     findByIds(ids: number[]) {
       return this.repository.findByIds(ids);
+    }
+
+    findByCursor(
+      first = 20,
+      after?: number,
+      where: FindConditions<Entity> = {},
+    ) {
+      const options: FindManyOptions<Entity> = {
+        order: { id: 'DESC' },
+        take: Math.min(first, 100),
+      };
+      if (after) {
+        options.where = { ...where, id: LessThan(after) };
+      }
+      return this.repository.find(options);
     }
 
     save(data: DeepPartial<Entity>) {
