@@ -55,6 +55,7 @@ export function ReusableService<Entity extends BaseModel>(
       where: FindConditions<Entity> = {},
     ) {
       const options: FindManyOptions<Entity> = {
+        where,
         order: { id: 'DESC' },
         take: Math.min(first, 100),
       };
