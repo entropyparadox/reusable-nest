@@ -1,6 +1,7 @@
-import { Type } from '@nestjs/common';
+import { Inject, Type } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Connection,
   DeepPartial,
   DeleteResult,
   FindConditions,
@@ -14,6 +15,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { BaseModel } from './base-model.entity';
 
 export interface IReusableService<Entity> {
+  readonly connection: Connection;
   readonly repository: Repository<Entity>;
   findById(id: number): Promise<Entity | undefined>;
   findAll(): Promise<Entity[]>;
@@ -37,6 +39,7 @@ export function ReusableService<Entity extends BaseModel>(
   entity: Type<Entity>,
 ): Type<IReusableService<Entity>> {
   class ReusableServiceHost implements IReusableService<Entity> {
+    @Inject() readonly connection!: Connection;
     @InjectRepository(entity) readonly repository!: Repository<Entity>;
 
     findById(id: number) {
