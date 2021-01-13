@@ -6,6 +6,7 @@ import {
   FindConditions,
   FindManyOptions,
   LessThan,
+  ObjectLiteral,
   Repository,
   UpdateResult,
 } from 'typeorm';
@@ -25,7 +26,8 @@ export interface IReusableService<Entity> {
   findByCursor(
     first?: number,
     after?: number,
-    where?: FindConditions<Entity>,
+    where?: FindConditions<Entity> | ObjectLiteral,
+    relations?: string[],
   ): Promise<Entity[]>;
   delete(id: number): Promise<DeleteResult>;
   deleteByIds(ids: number[]): Promise<DeleteResult>;
@@ -52,9 +54,11 @@ export function ReusableService<Entity extends BaseModel>(
     findByCursor(
       first = 20,
       after?: number,
-      where: FindConditions<Entity> = {},
+      where: FindConditions<Entity> | ObjectLiteral = {},
+      relations?: string[],
     ) {
       const options: FindManyOptions<Entity> = {
+        relations,
         where,
         order: { id: 'DESC' },
         take: Math.min(first, 100),
