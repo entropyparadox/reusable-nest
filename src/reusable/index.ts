@@ -6,3 +6,4 @@ export * from './reusable.module';
 export * from './reusable.resolver';
 export * from './reusable.service';
 export * from './storage.service';
+export * from './vimeo.service';

@@ -1,6 +1,6 @@
 {
   "name": "@entropyparadox/reusable-nest",
-  "version": "0.0.98",
+  "version": "0.0.106",
   "description": "Martian 팀의 NestJS 프로젝트에 재활용 가능한 모듈 및 유틸리티들을 모아둔 라이브러리 입니다.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,8 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "pluralize": "^8.0.0"
+    "pluralize": "^8.0.0",
+    "vimeo": "^2.1.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -40,6 +41,7 @@
     "@types/passport-jwt": "^3.0.3",
     "@types/passport-local": "^1.0.33",
     "@types/pluralize": "^0.0.29",
+    "@types/vimeo": "^2.1.3",
     "typescript": "^4.1.3"
   },
   "peerDependencies": {

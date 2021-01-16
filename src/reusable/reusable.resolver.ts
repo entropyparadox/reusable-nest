@@ -3,10 +3,12 @@ import { Resolver } from '@nestjs/graphql';
 import { BaseModel } from './base-model.entity';
 import { IReusableService } from './reusable.service';
 import { StorageService } from './storage.service';
+import { VimeoService } from './vimeo.service';
 
 export interface IReusableResolver<Service, Entity> {
   readonly service: Service;
   readonly storageService: StorageService;
+  readonly vimeoService: VimeoService;
 }
 
 export function ReusableResolver<
@@ -20,6 +22,7 @@ export function ReusableResolver<
   class ReusableResolverHost {
     @Inject(reusableService) readonly service!: Service;
     @Inject(StorageService) readonly storageService!: StorageService;
+    @Inject(VimeoService) readonly vimeoService!: VimeoService;
   }
   return ReusableResolverHost;
 }
