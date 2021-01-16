@@ -4,7 +4,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Vimeo } from 'vimeo';
 
 @ObjectType()
-export class VideoResponse {
+export class VimeoResponse {
   @Field(() => String)
   videoId!: string;
 
@@ -29,7 +29,7 @@ export class VimeoService {
     return uri.substr(index + 1);
   }
 
-  async createVideo(size: number): Promise<VideoResponse> {
+  async createVideo(size: number): Promise<VimeoResponse> {
     const result = await new Promise<any>((resolve, reject) => {
       this.client.request(
         {
@@ -58,7 +58,7 @@ export class VimeoService {
     };
   }
 
-  async replaceVideo(videoId: string, size: number): Promise<VideoResponse> {
+  async replaceVideo(videoId: string, size: number): Promise<VimeoResponse> {
     const result = await new Promise<any>((resolve, reject) => {
       this.client.request(
         {
