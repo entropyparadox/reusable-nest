@@ -159,6 +159,20 @@ export class AppModule {}
 .env
 ```
 
+8. 실행 명령어
+
+api 실행
+
+```
+nest start --watch
+```
+
+admin 실행
+
+```
+nest start admin --watch
+```
+
 ### Database
 
 1. 다음 명령어를 입력해서 컨테이너 이름은 `pg` 유저는 `postgres` 패스워드는 `asdf` 인 Docker 컨테이너를 실행한다.
