@@ -173,6 +173,41 @@ admin 실행
 nest start admin --watch
 ```
 
+9. resolver 쿼리가 하나도 없으면 실행이 안된다. 임시로 테스트해보려면 `resolvers` 폴더 안에 `my.resolver.ts` 파일을 만든다.
+
+```
+import { Query, Resolver } from '@nestjs/graphql';
+
+@Resolver()
+export class MyResolver {
+  @Query(() => String)
+  hi() {
+    return 'hi';
+  }
+}
+```
+
+그리고 `resolver.module.ts` 의 providers 에 추가해준다.
+
+```
+import { Module } from '@nestjs/common';
+import { MyResolver } from './my.resolver';
+
+@Module({
+  imports: [],
+  providers: [MyResolver],
+})
+export class ResolversModule {}
+```
+
+실행한 후에 [http://localhost:8000/graphql](http://localhost:8000/graphql) 로 접속해서 다음 쿼리를 실행해볼 수 있다. (admin 은 8001 포트)
+
+```
+query {
+  hi
+}
+```
+
 ### Database
 
 1. 다음 명령어를 입력해서 컨테이너 이름은 `pg` 유저는 `postgres` 패스워드는 `asdf` 인 Docker 컨테이너를 실행한다.
