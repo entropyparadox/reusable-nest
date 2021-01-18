@@ -9,14 +9,14 @@ export class StorageService {
 
   private get s3() {
     return new S3({
-      region: this.configService.get<string>('REGION'),
-      accessKeyId: this.configService.get<string>('ACCESS_KEY'),
-      secretAccessKey: this.configService.get<string>('SECRET_KEY'),
+      region: this.configService.get<string>('AWS_REGION'),
+      accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY'),
+      secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY'),
     });
   }
 
   private get bucketName() {
-    return this.configService.get<string>('BUCKET_NAME')!;
+    return this.configService.get<string>('AWS_BUCKET')!;
   }
 
   private async upload(key: string, file: FileUpload) {

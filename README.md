@@ -23,24 +23,63 @@ $ npm i -g @nestjs/cli
 $ nest new .
 ```
 
+패키지 매니저는 npm 으로
+
+3. `package.json` 파일에서 `name` 의 값을 `api` 로 변경한다.
+
+4. 다음 명령어를 입력해서 `admin` 앱을 추가한다.
+
+```
+nest g app admin
+```
+
+5. 다음 명령어를 입력해서 `app-library` 라이브러리를 생성한다.
+
+```
+nest g library app-library
+```
+
 ### Configuration
 
-1. 다음 명령어를 입력해 필요한 패키지를 설치한다.
+1. 다음 명령어를 입력해 필요한 패키지들을 설치한다.
 
 ```
-npm i @nestjs/config typeorm-naming-strategies
+npm i @nestjs/config @nestjs/graphql @nestjs/typeorm apollo-server-express graphql graphql-tools pg typeorm typeorm-naming-strategies
 ```
 
-2. `src/main.ts` 파일의 `await app.listen(3000);` 부분을 다음 코드로 교체해준다.
+2. 프로젝트 루트 경로에 `.env` 와 `.env.example` 파일을 생성하고 둘 다 다음 내용으로 채워준다.
 
 ```
-await app.listen(process.env.PORT || 8000);
+# common
+PORT=8000
+ADMIN_PORT=8001
+TZ=UTC
+
+# datasource
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=my-project
+DB_PASSWORD=asdf
+DB_DATABASE=my-project
+
+# aws
+AWS_REGION=ap-northeast-2
+AWS_BUCKET=my-project-dev
+AWS_ACCESS_KEY=
+AWS_SECRET_KEY=
+
+# vimeo
+VIMEO_CLIENT_ID=
+VIMEO_CLIENT_SECRET=
+VIMEO_ACCESS_TOKEN=
 ```
 
-3. `src/app.module.ts` 파일에 다음 내용을 추가한다.
+3. `libs/app-library/src/app-library.module.ts` 파일을 다음과 같이 작성한다.
 
 ```
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
@@ -55,35 +94,66 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        namingStrategy: new SnakeNamingStrategy(),
+        autoLoadEntities: true,
         synchronize: true,
         // dropSchema: true,
-        namingStrategy: new SnakeNamingStrategy(),
       }),
       inject: [ConfigService],
     }),
-    // ...
   ],
-  // ...
+})
+export class AppLibraryModule {}
+```
+
+4. `apps/api/src/main.ts` 파일의 `await app.listen(3000);` 부분을 다음 코드로 교체해준다.
+
+```
+await app.listen(process.env.PORT || 8000);
+```
+
+`apps/admin/src/main.ts` 파일도 비슷하게 8001 포트로 교체.
+
+```
+await app.listen(process.env.ADMIN_PORT || 8001);
+```
+
+5. `apps/api/src` 경로에 `resolvers` 폴더를 추가하고, 그 안에 `resolver.module.ts` 파일을 추가해서 다음과 같이 모듈을 만든다. (`admin`도 같은 방식으로 진행)
+
+```
+import { Module } from '@nestjs/common';
+
+@Module({
+  imports: [],
+  providers: [],
+})
+export class ResolversModule {}
+```
+
+6. `apps/api/src/app.module.ts` 파일을 다음과 같이 작성한다. (`admin`도 같은 방식으로 진행)
+
+```
+import { AppLibraryModule } from '@app/app-library/app-library.module';
+import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ResolversModule } from './resolvers/resolver.module';
+
+@Module({
+  imports: [
+    AppLibraryModule,
+    ResolversModule,
+    GraphQLModule.forRoot({
+      autoSchemaFile: true,
+      buildSchemaOptions: {
+        numberScalarMode: 'integer',
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```
 
-4. 프로젝트 루트 경로에 `.env` 와 `.env.example` 파일을 생성하고 둘 다 다음 내용으로 채워준다.
-
-```
-# common
-PORT=8000
-
-# datasource
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=my_project
-DB_PASSWORD=asdf
-DB_DATABASE=my_project
-```
-
-5. `.gitignore` 파일에 다음 내용을 추가한다.
+7. `.gitignore` 파일에 다음 내용을 추가한다.
 
 ```
 .env
