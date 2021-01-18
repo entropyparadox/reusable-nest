@@ -58,9 +58,9 @@ TZ=UTC
 # datasource
 DB_HOST=localhost
 DB_PORT=5432
-DB_USERNAME=my-project
+DB_USERNAME=my_project
 DB_PASSWORD=asdf
-DB_DATABASE=my-project
+DB_DATABASE=my_project
 
 # aws
 AWS_REGION=ap-northeast-2
@@ -210,24 +210,31 @@ query {
 
 ### Database
 
-1. 다음 명령어를 입력해서 컨테이너 이름은 `pg` 유저는 `postgres` 패스워드는 `asdf` 인 Docker 컨테이너를 실행한다.
+1. 다음 명령어를 입력해서 컨테이너 이름이 `pg` 인 Docker 컨테이너를 실행한다.
+
+유저는 `my_project` 패스워드는 `asdf` 데이터베이스는 `my_project`
 
 ```
-docker run --name pg -e POSTGRES_PASSWORD=asdf -e POSTGRES_DB=my_project -e POSTGRES_USER=my_project -p 5432:5432 -d postgres
+docker run --name pg -e POSTGRES_USER=my_project -e POSTGRES_PASSWORD=asdf -e POSTGRES_DB=my_project -p 5432:5432 -d postgres
 ```
 
 2. 다음 명령어를 입력해서 방금 생성한 `pg` 컨테이너에 `psql` 로 접속할 수 있다.
 
 ```
-docker exec -it pg psql -U postgres
+docker exec -it pg psql -U my_project
 ```
 
-3. (Optional) 기타 `psql` 명령어들
+3. `psql` 명령어들
 
-   - `create database my_project;` - my_project DB 생성
-   - `\l` - 모든 데이터베이스 나열하기
+   - `\du` - 모든 유저 리스트
+   - `CREATE USER my_project WITH PASSWORD 'asdf';` - 이름이 `my_project` 이고 비밀번호가 `asdf` 인 유저 생성
+   - `DROP USER my_project;` - 이름이 `my_project` 인 유저 삭제
+   - `\l` - 모든 데이터베이스 리스트
+   - `CREATE DATABASE my_project;` - 이름이 `my_project` 인 데이터베이스 생성
+   - `GRANT ALL PRIVILEGES ON DATABASE my_project TO my_project` - `my_project` 유저에게 `my_project` 데이터베이스 에 접근할 수 있는 권한 부여
+   - `\c` - 현재 연결된 데이터베이스 확인
    - `\c my_project` - 이름이 `my_project` 인 데이터베이스에 연결 (특정 데이터베이스에 대해 작업하기 위해 연결함)
-   - `\dt` - 연결한 데이터베이스의 모든 테이블 나열하기
+   - `\dt` - 연결한 데이터베이스의 모든 테이블 리스트
    - `\q` - `psql` 종료
 
 ### reusable-nest 세팅
