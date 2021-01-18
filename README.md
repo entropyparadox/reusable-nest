@@ -261,146 +261,149 @@ npm i @entropyparadox/reusable-nest
 
 ## Authentication
 
-1. `UsersModule` 에 `AuthModule` 을 추가한다.
+1. `libs/app-library/src` 밑에 `users` 폴더를 만들고 다음과 같이 파일들을 추가한다.
 
 ```
-import { AuthModule } from '@entropyparadox/reusable-nest';
-import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-
-@Module({
-  imports: [
-    AuthModule.register(UsersModule, UsersService),
-  ],
-  providers: [UsersService],
-  exports: [UsersService],
-})
-export class UsersModule {}
+users
+- user.entity.ts
+- users.enum.ts
+- users.module.ts
+- users.service.ts
 ```
 
-2. `User` Entity 에서 `AuthUser` 를 상속받는다.
+2. `users.enum.ts` 예시
+
+```
+import { registerEnumType } from '@nestjs/graphql';
+
+export enum Role {
+  ADMIN = 'ADMIN',
+  BUSINESS = 'BUSINESS',
+  USER = 'USER',
+}
+
+registerEnumType(Role, { name: 'Role' });
+```
+
+`Role` 안에 `ADMIN` 과 `USER` 는 필수
+
+3. `user.entity.ts` 예시
 
 ```
 import { AuthUser } from '@entropyparadox/reusable-nest';
-import { ObjectType, Field } from '@nestjs/graphql';
-import { Entity, Column } from 'typeorm';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Column, Entity } from 'typeorm';
+import { Role } from './users.enum';
 
 @ObjectType()
 @Entity()
-export class User extends AuthUser {
+export class User extends AuthUser(Role) {
   @Field()
-  @Column('text', { nullable: false })
+  @Column('text')
   name: string;
 }
 ```
 
-`AuthUser` 의 프로퍼티
+`AuthUser` 가 제공하는 프로퍼티
 
 - id: number;
-- email: string;
-- password: string;
-- role: string;
-- isActive: boolean;
-- isAdmin: boolean;
 - createdAt: Date;
 - updatedAt: Date;
+- email: string;
+- password: string;
+- role: Role;
 
-3. `UsersService` 에서 `AuthUsersSerivice` 를 구현한다.
+4. `users.service.ts` 예시
 
 ```
-import { AuthUsersService } from '@entropyparadox/reusable-nest';
+import { ReusableUsersService } from '@entropyparadox/reusable-nest';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './user.entity';
 
 @Injectable()
-export class UsersService implements AuthUsersService {
-  constructor(
-    @InjectRepository(User)
-    private repository: Repository<User>,
-  ) {}
-
-  create(createUserInput: CreateUserInput) {
-    return this.repository.save(createUserInput);
-  }
-
-  findById(id: number) {
-    return this.repository.findOne(id);
-  }
-
-  findByEmail(email: string) {
-    return this.repository.findOne({ where: { email } });
-  }
-}
+export class UsersService extends ReusableUsersService(User) {}
 ```
 
-4. `UsersResolver` 예시
+5. `users.module.ts` 예시
 
 ```
-import {
-  AuthResponse,
-  AuthService,
-  CurrentUser,
-  GqlLocalAuthGuard,
-  Public,
-} from '@entropyparadox/reusable-nest';
-import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { AuthModule } from '@entropyparadox/reusable-nest';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    AuthModule.register(UsersModule, UsersService),
+  ],
+  providers: [UsersService],
+  exports: [
+    UsersService,
+    {
+      provide: AuthModule,
+      useExisting: AuthModule,
+    },
+  ],
+})
+export class UsersModule {}
+```
+
+6. `apps/api/src` 폴더에 `dtos` 폴더를 만들고 그 밑에 `users.dto.ts` 파일을 만든다.
+
+```
+import { User } from '@app/app-library/users/user.entity';
+import { ArgsType, InputType, PartialType, PickType } from '@nestjs/graphql';
+
+@InputType()
+export class SignupInput extends PickType(
+  User,
+  ['email', 'password', 'name',],
+  InputType,
+) {}
+
+@ArgsType()
+export class UpdateMeArgs extends PartialType(
+  PickType(User, ['name']),
+  ArgsType,
+) {}
+```
+
+7. `apps/api/src/resolvers` 폴더에 `users.resolver.ts` 파일을 만든다.
+
+```
+import { User } from '@app/app-library/users/user.entity';
+import { UsersService } from '@app/app-library/users/users.service';
+import {
+  AuthResponse,
+  Public,
+  ReusableUsersResolver,
+} from '@entropyparadox/reusable-nest';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { SignupInput } from '../dtos/users.dto';
+
 @Resolver(() => User)
-export class UsersResolver {
-  constructor(
-    private readonly service: UsersService,
-    private readonly authService: AuthService,
-  ) {}
-
+export class UsersResolver extends ReusableUsersResolver(UsersService, User) {
   @Public()
   @Mutation(() => AuthResponse)
-  signup(@Args('input') createUserInput: CreateUserInput) {
-    return this.authService.signup(createUserInput);
-  }
-
-  @Public()
-  @Mutation(() => AuthResponse)
-  @UseGuards(GqlLocalAuthGuard)
-  login(
-    @Args('email') email: string,
-    @Args('password') password: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.authService.login(user.id);
-  }
-
-  @Query(() => [User])
-  users() {
-    return this.service.findAll();
-  }
-
-  @Query(() => User)
-  user(@Args('id', { type: () => Int }) id: number) {
-    return this.service.findById(id);
-  }
-
-  @Query(() => User)
-  me(@CurrentUser() user: User) {
-    return user;
-  }
-
-  @Mutation(() => User)
-  updateUser(@Args('input') updateUserInput: UpdateUserInput) {
-    return this.service.update(updateUserInput.id, updateUserInput);
-  }
-
-  @Mutation(() => User)
-  removeUser(@Args('id', { type: () => Int }) id: number) {
-    return this.service.remove(id);
+  async signup(@Args('input') input: SignupInput) {
+    return this.authService.signup(input);
   }
 }
+```
+
+8. 마지막 `resolver.module.ts` 파일을 다음과 같이 작성한다.
+
+```
+import { UsersModule } from '@app/app-library/users/users.module';
+import { ReusableModule } from '@entropyparadox/reusable-nest';
+import { Module } from '@nestjs/common';
+import { UsersResolver } from './users.resolver';
+
+@Module({
+  imports: [ReusableModule, UsersModule],
+  providers: [UsersResolver],
+})
+export class ResolversModule {}
 ```
