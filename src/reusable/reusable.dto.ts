@@ -14,3 +14,9 @@ export class DeleteResponse {
   @Field(() => Int)
   id!: number;
 }
+
+@ObjectType()
+export class BatchResponse {
+  @Field(() => [Int])
+  ids!: number[];
+}
