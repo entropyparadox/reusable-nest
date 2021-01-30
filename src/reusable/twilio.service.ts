@@ -16,9 +16,9 @@ export class TwilioService {
   private readonly apiSecret: string;
 
   constructor(private configService: ConfigService) {
-    this.clientId = this.configService.get('VIMEO_CLIENT_ID')!;
-    this.apiKey = this.configService.get('VIMEO_CLIENT_ID')!;
-    this.apiSecret = this.configService.get('VIMEO_CLIENT_ID')!;
+    this.clientId = this.configService.get('TWILIO_ACCOUNT_SID')!;
+    this.apiKey = this.configService.get('TWILIO_API_KEY')!;
+    this.apiSecret = this.configService.get('TWILIO_API_SECRET')!;
   }
 
   generateAccessToken(identity: string, room: string): TwilioResponse {
