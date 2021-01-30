@@ -18,9 +18,9 @@ export class VimeoService {
 
   constructor(private configService: ConfigService) {
     this.client = new Vimeo(
-      this.configService.get<string>('VIMEO_CLIENT_ID') as string,
-      this.configService.get<string>('VIMEO_CLIENT_SECRET') as string,
-      this.configService.get<string>('VIMEO_ACCESS_TOKEN'),
+      this.configService.get('VIMEO_CLIENT_ID')!,
+      this.configService.get('VIMEO_CLIENT_SECRET')!,
+      this.configService.get('VIMEO_ACCESS_TOKEN'),
     );
   }
 

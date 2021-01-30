@@ -5,18 +5,16 @@ import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class StorageService {
-  constructor(private configService: ConfigService) {}
+  private readonly bucketName: string;
+  private readonly s3: S3;
 
-  private get s3() {
-    return new S3({
-      region: this.configService.get<string>('AWS_REGION'),
-      accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY'),
-      secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY'),
+  constructor(private configService: ConfigService) {
+    this.bucketName = this.configService.get<string>('AWS_BUCKET')!;
+    this.s3 = new S3({
+      region: this.configService.get('AWS_REGION'),
+      accessKeyId: this.configService.get('AWS_ACCESS_KEY'),
+      secretAccessKey: this.configService.get('AWS_SECRET_KEY'),
     });
-  }
-
-  private get bucketName() {
-    return this.configService.get<string>('AWS_BUCKET')!;
   }
 
   private async upload(key: string, file: FileUpload) {
