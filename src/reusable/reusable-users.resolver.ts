@@ -42,6 +42,12 @@ export function ReusableUsersResolver<
       return this.authService.login(user.id);
     }
 
+    @Public()
+    @Mutation(() => AuthResponse)
+    loginWithKakao(@Args('accessToken') accessToken: string) {
+      return this.authService.loginWithKakao(accessToken);
+    }
+
     @Query(() => entity)
     me(@CurrentUser() user: Entity) {
       return user;

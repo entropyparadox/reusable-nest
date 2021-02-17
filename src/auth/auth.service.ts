@@ -5,6 +5,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
+import axios from 'axios';
 
 export interface EmailAndPassword {
   email: string;
@@ -14,8 +15,11 @@ export interface EmailAndPassword {
 
 @ObjectType()
 export class AuthResponse {
-  @Field(() => String)
-  token!: string;
+  @Field(() => String, { nullable: true })
+  token?: string;
+
+  @Field(() => String, { nullable: true })
+  kakaoId?: string;
 }
 
 @Injectable()
@@ -35,5 +39,20 @@ export class AuthService {
   async login(userId: number): Promise<AuthResponse> {
     const payload = { sub: userId };
     return { token: this.jwtService.sign(payload) };
+  }
+
+  async loginWithKakao(accessToken: string) {
+    const { status, data } = await axios({
+      url: 'https://kapi.kakao.com/v1/user/access_token_info',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (status !== 200) {
+      throw Error('Authentication with Kakao failed');
+    }
+    const user = await this.usersService.findByKakaoId(data.id);
+    if (user) {
+      return this.login(user.id);
+    }
+    return { kakaoId: data.id };
   }
 }

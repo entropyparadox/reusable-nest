@@ -5,6 +5,7 @@ import { IReusableService, ReusableService } from './reusable.service';
 export interface IReusableUsersService<Entity>
   extends IReusableService<Entity> {
   findByEmail(email: string): Promise<Entity | undefined>;
+  findByKakaoId(kakaoId: string): Promise<Entity | undefined>;
 }
 
 export function ReusableUsersService<Entity extends IAuthUser<any>>(
@@ -15,6 +16,10 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
     implements IReusableUsersService<Entity> {
     findByEmail(email: string) {
       return this.repository.findOne({ where: { email } });
+    }
+
+    findByKakaoId(kakaoId: string) {
+      return this.repository.findOne({ where: { kakaoId } });
     }
   }
   return ReusableUsersServiceHost;
