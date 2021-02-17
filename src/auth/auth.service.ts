@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { hash } from 'bcryptjs';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
@@ -18,8 +18,8 @@ export class AuthResponse {
   @Field(() => String, { nullable: true })
   token?: string;
 
-  @Field(() => String, { nullable: true })
-  kakaoId?: string;
+  @Field(() => Int, { nullable: true })
+  kakaoId?: number;
 }
 
 @Injectable()
