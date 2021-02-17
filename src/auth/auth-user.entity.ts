@@ -7,7 +7,6 @@ import { BaseRole } from './auth.enum';
 export interface IAuthUser<R> extends BaseModel {
   email: string;
   password: string;
-  kakaoId: number;
   role: R;
 }
 
@@ -16,17 +15,13 @@ export function AuthUser<R extends string>(
 ): Type<IAuthUser<R>> {
   @ObjectType({ isAbstract: true })
   class AuthUserHost extends BaseModel implements IAuthUser<R> {
-    @Field(() => String)
+    @Field(() => String, { nullable: true })
     @Column('text', { unique: true, nullable: true })
     email!: string;
 
-    @Field(() => String)
+    @Field(() => String, { nullable: true })
     @Column('text', { nullable: true })
     password!: string;
-
-    @Field()
-    @Column({ unique: true, nullable: true })
-    kakaoId!: number;
 
     @Field(() => role)
     @Column({ type: 'enum', enum: role, default: BaseRole.USER })
