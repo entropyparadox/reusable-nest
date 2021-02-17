@@ -7,12 +7,6 @@ import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
 import axios from 'axios';
 
-export interface EmailAndPassword {
-  email: string;
-  password: string;
-  [others: string]: any;
-}
-
 @ObjectType()
 export class AuthResponse {
   @Field(() => String, { nullable: true })
@@ -30,8 +24,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signup(user: EmailAndPassword): Promise<AuthResponse> {
-    user.password = await hash(user.password, 10);
+  async signup(user: any): Promise<AuthResponse> {
+    if (user.password) {
+      user.password = await hash(user.password, 10);
+    }
     const { id } = await this.usersService.save(user);
     return this.login(id);
   }
