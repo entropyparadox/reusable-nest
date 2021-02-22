@@ -14,7 +14,7 @@ export interface IReusableAdminResolver<Service, Entity> {
   getMany(ids: number[]): Promise<Entity[]>;
   // getManyReference
   create(data: string): Promise<Entity>;
-  update(id: number, data: string): Promise<Entity>;
+  update(id: number, data: string): Promise<Entity | undefined>;
   updateMany(ids: number[], data: string): Promise<number[]>;
   delete(id: number): Promise<number>;
   deleteMany(ids: number[]): Promise<number[]>;
@@ -60,8 +60,9 @@ export function ReusableAdminResolver<
 
     @Roles(BaseRole.ADMIN)
     @Mutation(() => entity, { name: `update${entity.name}` })
-    update(@Args('id') id: number, @Args('data') data: string) {
-      return this.service.save({ ...JSON.parse(data), id });
+    async update(@Args('id') id: number, @Args('data') data: string) {
+      await this.service.save({ ...JSON.parse(data), id });
+      return this.service.findById(id);
     }
 
     @Roles(BaseRole.ADMIN)
