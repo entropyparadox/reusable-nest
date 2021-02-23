@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { hash } from 'bcryptjs';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
@@ -25,9 +24,6 @@ export class AuthService {
   ) {}
 
   async signup(user: any): Promise<AuthResponse> {
-    if (user.password) {
-      user.password = await hash(user.password, 10);
-    }
     const { id } = await this.usersService.save(user);
     return this.login(id);
   }
