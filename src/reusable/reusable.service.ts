@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseModel } from './base-model.entity';
+import { IPaginationResponse } from './reusable.dto';
 
 export interface IReusableService<Entity> {
   readonly connection: Connection;
@@ -31,6 +32,11 @@ export interface IReusableService<Entity> {
     where?: FindConditions<Entity> | ObjectLiteral,
     relations?: string[],
   ): Promise<Entity[]>;
+  findByPage(
+    page?: number,
+    perPage?: number,
+    where?: FindConditions<Entity> | ObjectLiteral,
+  ): Promise<IPaginationResponse<Entity>>;
   delete(id: number): Promise<DeleteResult>;
   deleteByIds(ids: number[]): Promise<DeleteResult>;
 }
@@ -70,6 +76,21 @@ export function ReusableService<Entity extends BaseModel>(
         options.where = { ...where, id: LessThan(after) };
       }
       return this.repository.find(options);
+    }
+
+    async findByPage(
+      page = 1,
+      perPage = 20,
+      where: FindConditions<Entity> | ObjectLiteral = {},
+    ) {
+      const total = await this.repository.count();
+      const data = await this.repository.find({
+        where,
+        order: { id: 'DESC' },
+        skip: (page - 1) * perPage,
+        take: Math.min(perPage, 100),
+      });
+      return { data, total };
     }
 
     save(data: DeepPartial<Entity>) {

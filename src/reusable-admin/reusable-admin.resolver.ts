@@ -5,12 +5,16 @@ import { plural } from 'pluralize';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
+import {
+  IPaginationResponse,
+  PaginationResponse,
+} from '../reusable/reusable.dto';
 import { IReusableService } from '../reusable/reusable.service';
 
 export interface IReusableAdminResolver<Service, Entity> {
   readonly service: Service;
   getOne(id: number): Promise<Entity | undefined>;
-  getList(): Promise<Entity[]>;
+  getList(page: number, perPage: number): Promise<IPaginationResponse<Entity>>;
   getMany(ids: number[]): Promise<Entity[]>;
   // getManyReference
   create(data: string): Promise<Entity>;
@@ -39,9 +43,11 @@ export function ReusableAdminResolver<
     }
 
     @Roles(BaseRole.ADMIN)
-    @Query(() => [entity], { name: camelCase(plural(entity.name)) })
-    getList() {
-      return this.service.findAll();
+    @Query(() => PaginationResponse(entity), {
+      name: camelCase(plural(entity.name)),
+    })
+    getList(@Args('page') page: number, @Args('perPage') perPage: number) {
+      return this.service.findByPage(page, perPage);
     }
 
     @Roles(BaseRole.ADMIN)
