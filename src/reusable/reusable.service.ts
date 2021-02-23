@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseModel } from './base-model.entity';
-import { IPaginationResponse } from './reusable.dto';
+import { IPaginatedResponse } from './reusable.dto';
 
 export interface IReusableService<Entity> {
   readonly connection: Connection;
@@ -36,7 +36,7 @@ export interface IReusableService<Entity> {
     page?: number,
     perPage?: number,
     where?: FindConditions<Entity> | ObjectLiteral,
-  ): Promise<IPaginationResponse<Entity>>;
+  ): Promise<IPaginatedResponse<Entity>>;
   delete(id: number): Promise<DeleteResult>;
   deleteByIds(ids: number[]): Promise<DeleteResult>;
 }

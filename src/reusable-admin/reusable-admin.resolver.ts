@@ -6,15 +6,15 @@ import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
 import {
-  IPaginationResponse,
-  PaginationResponse,
+  IPaginatedResponse,
+  PaginatedResponse,
 } from '../reusable/reusable.dto';
 import { IReusableService } from '../reusable/reusable.service';
 
 export interface IReusableAdminResolver<Service, Entity> {
   readonly service: Service;
   getOne(id: number): Promise<Entity | undefined>;
-  getList(page: number, perPage: number): Promise<IPaginationResponse<Entity>>;
+  getList(page: number, perPage: number): Promise<IPaginatedResponse<Entity>>;
   getMany(ids: number[]): Promise<Entity[]>;
   // getManyReference
   create(data: string): Promise<Entity>;
@@ -31,6 +31,9 @@ export function ReusableAdminResolver<
   reusableService: Type<Service>,
   entity: Type<Entity>,
 ): Type<IReusableAdminResolver<Service, Entity>> {
+  const PaginatedEntityResponse = PaginatedResponse(entity);
+  type PaginatedEntityResponse = InstanceType<typeof PaginatedEntityResponse>;
+
   @Resolver()
   class ReusableAdminResolverHost
     implements IReusableAdminResolver<Service, Entity> {
@@ -43,7 +46,7 @@ export function ReusableAdminResolver<
     }
 
     @Roles(BaseRole.ADMIN)
-    @Query(() => PaginationResponse(entity), {
+    @Query(() => PaginatedEntityResponse, {
       name: camelCase(plural(entity.name)),
     })
     getList(@Args('page') page: number, @Args('perPage') perPage: number) {

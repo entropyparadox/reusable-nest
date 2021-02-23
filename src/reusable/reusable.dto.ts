@@ -23,21 +23,21 @@ export class BatchResponse {
   ids!: number[];
 }
 
-export interface IPaginationResponse<Entity> {
+export interface IPaginatedResponse<Entity> {
   data: Entity[];
   total: number;
 }
 
-export function PaginationResponse<Entity extends BaseModel>(
+export function PaginatedResponse<Entity extends BaseModel>(
   entity: Type<Entity>,
-): Type<IPaginationResponse<Entity>> {
-  @ObjectType()
-  class PaginationResponseHost {
+): Type<IPaginatedResponse<Entity>> {
+  @ObjectType(`Paginated${entity.name}Response`)
+  class PaginatedResponseHost {
     @Field(() => [entity])
     data!: Entity[];
 
     @Field(() => Int)
     total!: number;
   }
-  return PaginationResponseHost;
+  return PaginatedResponseHost;
 }
