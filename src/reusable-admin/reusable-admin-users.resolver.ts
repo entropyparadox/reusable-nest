@@ -1,4 +1,4 @@
-import { Type, UseGuards } from '@nestjs/common';
+import { Inject, Type, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
   AuthResponse,
@@ -31,9 +31,7 @@ export function ReusableAdminUsersResolver<
   class ReusableAdminUsersResolverHost
     extends ReusableAdminResolver(reusableService, entity)
     implements IReusableAdminUsersResolver<Service, Entity> {
-    constructor(private readonly authService: AuthService) {
-      super();
-    }
+    @Inject(AuthService) readonly authService!: AuthService;
 
     @Public()
     @UseGuards(GqlLocalAuthGuard)
