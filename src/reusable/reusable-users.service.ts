@@ -7,6 +7,7 @@ import { IReusableService, ReusableService } from './reusable.service';
 export interface IReusableUsersService<Entity>
   extends IReusableService<Entity> {
   findByEmail(email: string): Promise<Entity | undefined>;
+  findByEmailIncludingPassword(email: string): Promise<Entity | undefined>;
   findByKakaoId(kakaoId: string): Promise<Entity | undefined>;
   save(user: DeepPartial<Entity>): Promise<Entity>;
 }
@@ -19,6 +20,14 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
     implements IReusableUsersService<Entity> {
     findByEmail(email: string) {
       return this.repository.findOne({ where: { email } });
+    }
+
+    findByEmailIncludingPassword(email: string) {
+      return this.repository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where('user.email = :email', { email })
+        .getOne();
     }
 
     findByKakaoId(kakaoId: string) {

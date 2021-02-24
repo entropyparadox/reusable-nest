@@ -20,7 +20,7 @@ export function AuthUser<R extends string>(
     email!: string;
 
     @Field(() => String, { nullable: true })
-    @Column('text', { nullable: true })
+    @Column('text', { nullable: true, select: false })
     password!: string;
 
     @Field(() => role)
