@@ -16,7 +16,12 @@ export interface IReusableAdminResolver<Service, Entity> {
   getOne(id: number): Promise<Entity | undefined>;
   getList(page: number, perPage: number): Promise<IPaginatedResponse<Entity>>;
   getMany(ids: number[]): Promise<Entity[]>;
-  // getManyReference
+  getManyReference(
+    target: string,
+    id: number,
+    page: number,
+    perPage: number,
+  ): Promise<IPaginatedResponse<Entity>>;
   create(data: string): Promise<Entity>;
   update(id: number, data: string): Promise<Entity | undefined>;
   updateMany(ids: number[], data: string): Promise<number[]>;
@@ -59,7 +64,18 @@ export function ReusableAdminResolver<
       return this.service.findByIds(ids);
     }
 
-    // getManyReference
+    @Roles(BaseRole.ADMIN)
+    @Query(() => PaginatedEntityResponse, {
+      name: `${camelCase(plural(entity.name))}ByTarget`,
+    })
+    getManyReference(
+      @Args('target') target: string,
+      @Args('id') id: number,
+      @Args('page') page: number,
+      @Args('perPage') perPage: number,
+    ) {
+      return this.service.findByPage(page, perPage, { [target]: id });
+    }
 
     @Roles(BaseRole.ADMIN)
     @Mutation(() => entity, { name: `create${entity.name}` })
