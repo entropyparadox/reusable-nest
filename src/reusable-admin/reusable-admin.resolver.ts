@@ -1,6 +1,6 @@
 import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { camelCase } from 'lodash';
+import { camelCase, kebabCase } from 'lodash';
 import { plural } from 'pluralize';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
@@ -10,9 +10,11 @@ import {
   PaginatedResponse,
 } from '../reusable/reusable.dto';
 import { IReusableService } from '../reusable/reusable.service';
+import { File, StorageService } from '../reusable/storage.service';
 
 export interface IReusableAdminResolver<Service, Entity> {
   readonly service: Service;
+  readonly storageService: StorageService;
   getOne(id: number): Promise<Entity | undefined>;
   getList(page: number, perPage: number): Promise<IPaginatedResponse<Entity>>;
   getMany(ids: number[]): Promise<Entity[]>;
@@ -43,6 +45,7 @@ export function ReusableAdminResolver<
   class ReusableAdminResolverHost
     implements IReusableAdminResolver<Service, Entity> {
     @Inject(reusableService) readonly service!: Service;
+    @Inject(StorageService) readonly storageService!: StorageService;
 
     @Roles(BaseRole.ADMIN)
     @Query(() => entity, { name: camelCase(entity.name) })
@@ -79,14 +82,32 @@ export function ReusableAdminResolver<
 
     @Roles(BaseRole.ADMIN)
     @Mutation(() => entity, { name: `create${entity.name}` })
-    create(@Args('data') data: string) {
-      return this.service.save(JSON.parse(data));
+    async create(@Args('data') data: string) {
+      const parsedData = JSON.parse(data);
+      const filesWithKey = this.convertBase64PropertiesToFile(parsedData);
+      if (filesWithKey.length === 0) {
+        return this.service.save({ ...parsedData });
+      }
+      const uploadedData = await this.uploadFiles(parsedData, filesWithKey);
+      return this.service.save({ ...uploadedData });
     }
 
     @Roles(BaseRole.ADMIN)
     @Mutation(() => entity, { name: `update${entity.name}` })
     async update(@Args('id') id: number, @Args('data') data: string) {
-      await this.service.save({ ...JSON.parse(data), id });
+      const parsedData = JSON.parse(data);
+      const filesWithKey = this.convertBase64PropertiesToFile(parsedData);
+      if (filesWithKey.length === 0) {
+        await this.service.save({ ...parsedData, id });
+        return this.service.findById(id);
+      }
+      const prev = await this.service.findById(id);
+      const uploadedData = await this.uploadFiles(
+        parsedData,
+        filesWithKey,
+        prev,
+      );
+      await this.service.save({ ...uploadedData, id });
       return this.service.findById(id);
     }
 
@@ -113,6 +134,46 @@ export function ReusableAdminResolver<
       await this.service.deleteByIds(ids);
       return ids;
     }
+
+    private convertBase64PropertiesToFile = (data: any) => {
+      return Object.keys(data)
+        .filter((key) => data[key] && data[key].base64)
+        .map((key) => {
+          const arr = data[key].base64.split(',');
+          const mime = arr[0].match(/:(.*?);/)[1];
+          const buf = Buffer.from(arr[1], 'base64');
+          return {
+            key,
+            file: new File(buf, data[key].title, mime, 'base64'),
+          };
+        });
+    };
+
+    private uploadFiles = async (
+      data: any,
+      filesWithKey: { key: string; file: File }[],
+      prev?: any,
+    ) => {
+      const promises = filesWithKey.map(async ({ key, file }) => {
+        const { Key } =
+          prev && prev[key]
+            ? await this.storageService.replace(prev[key], file)
+            : await this.storageService.add(this.s3Path(key), file);
+        return { key, Key }; // key for property name and Key for S3 path
+      });
+      const uploadedKeys = await Promise.all(promises);
+      return Object.assign(
+        {},
+        data,
+        ...uploadedKeys.map(({ key, Key }) => ({ [key]: Key })),
+      );
+    };
+
+    private s3Path = (key: string) => {
+      const entityName = kebabCase(plural(entity.name));
+      const propertyName = kebabCase(plural(key));
+      return `${entityName}/${propertyName}`;
+    };
   }
   return ReusableAdminResolverHost;
 }
