@@ -24,7 +24,7 @@ export interface IReusableAdminResolver<Service, Entity> {
     page: number,
     perPage: number,
   ): Promise<IPaginatedResponse<Entity>>;
-  create(data: string): Promise<Entity>;
+  create(data: string): Promise<Entity | undefined>;
   update(id: number, data: string): Promise<Entity | undefined>;
   updateMany(ids: number[], data: string): Promise<number[]>;
   delete(id: number): Promise<number>;
@@ -83,13 +83,16 @@ export function ReusableAdminResolver<
     @Roles(BaseRole.ADMIN)
     @Mutation(() => entity, { name: `create${entity.name}` })
     async create(@Args('data') data: string) {
+      let id: number;
       const parsedData = JSON.parse(data);
       const filesWithKey = this.convertBase64PropertiesToFile(parsedData);
       if (filesWithKey.length === 0) {
-        return this.service.save({ ...parsedData });
+        id = (await this.service.save({ ...parsedData })).id;
+      } else {
+        const uploadedData = await this.uploadFiles(parsedData, filesWithKey);
+        id = (await this.service.save({ ...uploadedData })).id;
       }
-      const uploadedData = await this.uploadFiles(parsedData, filesWithKey);
-      return this.service.save({ ...uploadedData });
+      return this.service.findById(id);
     }
 
     @Roles(BaseRole.ADMIN)
@@ -99,15 +102,15 @@ export function ReusableAdminResolver<
       const filesWithKey = this.convertBase64PropertiesToFile(parsedData);
       if (filesWithKey.length === 0) {
         await this.service.save({ ...parsedData, id });
-        return this.service.findById(id);
+      } else {
+        const prev = await this.service.findById(id);
+        const uploadedData = await this.uploadFiles(
+          parsedData,
+          filesWithKey,
+          prev,
+        );
+        await this.service.save({ ...uploadedData, id });
       }
-      const prev = await this.service.findById(id);
-      const uploadedData = await this.uploadFiles(
-        parsedData,
-        filesWithKey,
-        prev,
-      );
-      await this.service.save({ ...uploadedData, id });
       return this.service.findById(id);
     }
 
