@@ -2,6 +2,7 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { camelCase, kebabCase } from 'lodash';
 import { plural } from 'pluralize';
+import { ILike } from 'typeorm';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
@@ -16,14 +17,9 @@ export interface IReusableAdminResolver<Service, Entity> {
   readonly service: Service;
   readonly storageService: StorageService;
   getOne(id: number): Promise<Entity | undefined>;
-  getList(page: number, perPage: number): Promise<IPaginatedResponse<Entity>>;
+  getList(params: string): Promise<IPaginatedResponse<Entity>>;
   getMany(ids: number[]): Promise<Entity[]>;
-  getManyReference(
-    target: string,
-    id: number,
-    page: number,
-    perPage: number,
-  ): Promise<IPaginatedResponse<Entity>>;
+  getManyReference(params: string): Promise<IPaginatedResponse<Entity>>;
   create(data: string): Promise<Entity | undefined>;
   update(id: number, data: string): Promise<Entity | undefined>;
   updateMany(ids: number[], data: string): Promise<number[]>;
@@ -57,8 +53,20 @@ export function ReusableAdminResolver<
     @Query(() => PaginatedEntityResponse, {
       name: camelCase(plural(entity.name)),
     })
-    getList(@Args('page') page: number, @Args('perPage') perPage: number) {
-      return this.service.findByPage(page, perPage);
+    getList(@Args('params') params: string) {
+      const {
+        pagination: { page, perPage },
+        filter,
+      } = JSON.parse(params);
+      const where = Object.entries(filter).reduce((acc, [key, value]) => {
+        if (typeof value === 'string') {
+          acc[key] = ILike(`%${value}%`);
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+      return this.service.findByPage(page, perPage, where);
     }
 
     @Roles(BaseRole.ADMIN)
@@ -71,13 +79,25 @@ export function ReusableAdminResolver<
     @Query(() => PaginatedEntityResponse, {
       name: `${camelCase(plural(entity.name))}ByTarget`,
     })
-    getManyReference(
-      @Args('target') target: string,
-      @Args('id') id: number,
-      @Args('page') page: number,
-      @Args('perPage') perPage: number,
-    ) {
-      return this.service.findByPage(page, perPage, { [target]: id });
+    getManyReference(@Args('params') params: string) {
+      const {
+        target,
+        id,
+        pagination: { page, perPage },
+        filter,
+      } = JSON.parse(params);
+      const where = Object.entries(filter).reduce(
+        (acc, [key, value]) => {
+          if (typeof value === 'string') {
+            acc[key] = ILike(`%${value}%`);
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        { [target]: id } as any,
+      );
+      return this.service.findByPage(page, perPage, where);
     }
 
     @Roles(BaseRole.ADMIN)
