@@ -88,7 +88,7 @@ export function ReusableService<Entity extends BaseModel>(
         where,
         order: { id: 'DESC' },
         skip: (page - 1) * perPage,
-        take: Math.min(perPage, 100),
+        take: Math.min(perPage, 1000),
       });
       return { data, total };
     }
