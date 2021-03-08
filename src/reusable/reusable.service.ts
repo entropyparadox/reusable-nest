@@ -83,7 +83,7 @@ export function ReusableService<Entity extends BaseModel>(
       perPage = 20,
       where: FindConditions<Entity> | ObjectLiteral = {},
     ) {
-      const total = await this.repository.count();
+      const total = await this.repository.count({ where });
       const data = await this.repository.find({
         where,
         order: { id: 'DESC' },
