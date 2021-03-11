@@ -2,7 +2,7 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { camelCase, kebabCase } from 'lodash';
 import { plural } from 'pluralize';
-import { ILike } from 'typeorm';
+import { ILike, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
@@ -59,8 +59,12 @@ export function ReusableAdminResolver<
         filter,
       } = JSON.parse(params);
       const where = Object.entries(filter).reduce((acc, [key, value]) => {
-        if (typeof value === 'string') {
-          acc[key] = ILike(`%${value}%`);
+        if (key === 'start_gte') {
+          acc.startedAt = MoreThanOrEqual(value);
+        } else if (key === 'start_lte') {
+          acc.startedAt = LessThanOrEqual(value);
+          // } else if (typeof value === 'string') {
+          //   acc[key] = ILike(`%${value}%`);
         } else {
           acc[key] = value;
         }

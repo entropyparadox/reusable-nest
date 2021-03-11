@@ -69,6 +69,7 @@ export function ReusableService<Entity extends BaseModel>(
       const options: FindManyOptions<Entity> = {
         relations,
         where,
+        // @ts-ignore
         order: { id: 'DESC' },
         take: Math.min(first, 100),
       };
@@ -84,6 +85,7 @@ export function ReusableService<Entity extends BaseModel>(
       where: FindConditions<Entity> | ObjectLiteral = {},
     ) {
       const total = await this.repository.count({ where });
+      // @ts-ignore
       const data = await this.repository.find({
         where,
         order: { id: 'DESC' },
