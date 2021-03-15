@@ -40,10 +40,16 @@ export class StorageService {
     let fileBuffer = file instanceof File ? file.body : file.createReadStream();
     if (fileType.includes('image')) {
       const sharp = require('sharp');
-      fileBuffer = await sharp(fileBuffer)
+      const resizer = sharp()
         .resize({ width: this.resize_width })
-        .jpeg({ quality: this.resize_quality })
-        .toBuffer();
+        .jpeg({ quality: this.resize_quality });
+      fileBuffer =
+        file instanceof File
+          ? await sharp(fileBuffer)
+              .resize({ width: this.resize_width })
+              .jpeg({ quality: this.resize_quality })
+              .toBuffer()
+          : file.createReadStream().pipe(resizer);
     }
     // TODO :: 파일포멧은 jpg로 통일되지만, 파일 확장자는 원본파일을 따라가고 있음. .jpg를 추가해줄 필요 있음.
     return this.s3
