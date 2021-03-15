@@ -40,9 +40,7 @@ export class StorageService {
     let fileBuffer = file instanceof File ? file.body : file.createReadStream();
     if (fileType.includes('image')) {
       const sharp = require('sharp');
-      fileBuffer = await sharp(
-        file instanceof File ? file.body : file.createReadStream(),
-      )
+      fileBuffer = await sharp(fileBuffer)
         .resize({ width: this.resize_width })
         .jpeg({ quality: this.resize_quality })
         .toBuffer();
