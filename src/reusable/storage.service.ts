@@ -31,8 +31,12 @@ export class StorageService {
       accessKeyId: this.configService.get('AWS_ACCESS_KEY'),
       secretAccessKey: this.configService.get('AWS_SECRET_KEY'),
     });
-    this.resize_width = this.configService.get('RESIZE_IMAGE_WIDTH', 768);
-    this.resize_quality = this.configService.get('RESIZE_IMAGE_QUALITY', 80);
+    this.resize_width = Number(
+      this.configService.get('RESIZE_IMAGE_WIDTH', '768'),
+    );
+    this.resize_quality = Number(
+      this.configService.get('RESIZE_IMAGE_QUALITY', '80'),
+    );
   }
 
   private async upload(key: string, file: File | FileUpload) {
