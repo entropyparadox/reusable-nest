@@ -46,12 +46,14 @@ export class StorageService {
       const sharp = require('sharp');
       const resizer = sharp()
         .resize({ width: this.resize_width })
-        .jpeg({ quality: this.resize_quality });
+        .jpeg({ quality: this.resize_quality })
+        .withMetadata();
       fileBuffer =
         file instanceof File
           ? await sharp(fileBuffer)
               .resize({ width: this.resize_width })
               .jpeg({ quality: this.resize_quality })
+              .withMetadata()
               .toBuffer()
           : file.createReadStream().pipe(resizer);
     }
