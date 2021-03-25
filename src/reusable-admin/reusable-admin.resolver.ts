@@ -2,7 +2,7 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { camelCase, kebabCase } from 'lodash';
 import { plural } from 'pluralize';
-import { ILike, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { ILike, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
@@ -63,6 +63,8 @@ export function ReusableAdminResolver<
           acc.startedAt = MoreThanOrEqual(value);
         } else if (key === 'start_lte') {
           acc.startedAt = LessThanOrEqual(value);
+        } else if (Array.isArray(value)) {
+          acc[key] = In(value);
           // } else if (typeof value === 'string') {
           //   acc[key] = ILike(`%${value}%`);
         } else {
