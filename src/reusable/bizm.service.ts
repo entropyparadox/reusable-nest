@@ -3,7 +3,7 @@ import axios from 'axios';
 
 @Injectable()
 export class BizmService {
-  sendMessage(templateId: string, message: string, phoneNumber: string) {
+  sendMessage(phoneNumber: string, templateId: string, message: string) {
     axios
       .post(
         'https://alimtalk-api.bizmsg.kr/v2/sender/send',
