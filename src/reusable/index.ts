@@ -1,4 +1,5 @@
 export * from './base-model.entity';
+export * from './bizm.service';
 export * from './reusable-users.resolver';
 export * from './reusable-users.service';
 export * from './reusable.dto';

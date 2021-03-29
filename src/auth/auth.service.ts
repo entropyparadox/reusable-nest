@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { JwtService } from '@nestjs/jwt';
 import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
