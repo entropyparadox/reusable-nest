@@ -71,7 +71,7 @@ export class StorageService {
 
   async add(path: string, file: File | FileUpload) {
     let filename = file instanceof File ? file.name : file.filename;
-    filename = filename.replace(/[^0-9a-zA-Z.]/g, '_');
+    // filename = filename.replace(/[^0-9a-zA-Z.]/g, '_');
     const key = `${path}/${Date.now()}_${filename}`;
     return this.upload(key, file);
   }
