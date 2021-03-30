@@ -37,6 +37,8 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
     async save(user: any) {
       if (user.password) {
         user.password = await hash(user.password, 10);
+      } else if (user.password !== undefined) {
+        delete user.password;
       }
       return super.save(user);
     }
