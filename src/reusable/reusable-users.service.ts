@@ -2,6 +2,7 @@ import { Type } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { DeepPartial } from 'typeorm';
 import { IAuthUser } from '../auth';
+import { ExceptionCode, ReusableException } from '../exception';
 import { IReusableService, ReusableService } from './reusable.service';
 
 export interface IReusableUsersService<Entity>
@@ -35,6 +36,13 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
     }
 
     async save(user: any) {
+      if (user.email) {
+        const count = await this.repository.count({ email: user.email });
+        if (count > 0) {
+          throw new ReusableException(ExceptionCode.DUPLICATE_EMAIL);
+        }
+      }
+
       if (user.password) {
         user.password = await hash(user.password, 10);
       } else if (user.password !== undefined) {

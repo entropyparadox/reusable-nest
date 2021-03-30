@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { compare } from 'bcryptjs';
 import { Strategy } from 'passport-local';
 import { Provider } from '../enums';
+import { ExceptionCode, ReusableException } from '../exception';
 import { IReusableUsersService } from '../reusable';
 import { IAuthUser } from './auth-user.entity';
 
@@ -21,6 +22,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       return user;
     }
 
-    throw new UnauthorizedException();
+    throw new ReusableException(ExceptionCode.LOGIN_FAILED);
   }
 }

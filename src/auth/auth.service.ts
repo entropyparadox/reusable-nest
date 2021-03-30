@@ -5,6 +5,7 @@ import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
 import axios from 'axios';
+import { ExceptionCode, ReusableException } from '../exception';
 
 @ObjectType()
 export class AuthResponse {
@@ -39,7 +40,7 @@ export class AuthService {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (status !== 200) {
-      throw Error('Authentication with Kakao failed');
+      throw new ReusableException(ExceptionCode.LOGIN_FAILED);
     }
     const user = await this.usersService.findByKakaoId(data.id);
     if (user) {
