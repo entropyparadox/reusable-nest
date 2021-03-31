@@ -25,7 +25,7 @@ export class AuthService {
   ) {}
 
   async signup(user: any): Promise<AuthResponse> {
-    const { id } = await this.usersService.save(user);
+    const { id } = await this.usersService.signup(user);
     return this.login(id);
   }
 

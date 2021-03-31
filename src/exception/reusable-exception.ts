@@ -50,6 +50,10 @@ export class ReusableException extends HttpException {
       en: 'Email has already been taken',
       ko: '이미 등록된 이메일 주소입니다',
     },
+    [ExceptionCode.SHORT_PASSWORD]: {
+      en: 'Password is too short',
+      ko: '비밀번호가 너무 짧습니다',
+    },
     [ExceptionCode.LOGIN_FAILED]: {
       en: 'Login failed',
       ko: '로그인에 실패했습니다',

@@ -10,6 +10,7 @@ export interface IReusableUsersService<Entity>
   findByEmail(email: string): Promise<Entity | undefined>;
   findByEmailIncludingPassword(email: string): Promise<Entity | undefined>;
   findByKakaoId(kakaoId: string): Promise<Entity | undefined>;
+  signup(user: DeepPartial<Entity>): Promise<Entity>;
   save(user: DeepPartial<Entity>): Promise<Entity>;
 }
 
@@ -35,7 +36,7 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
       return this.repository.findOne({ where: { kakaoId } });
     }
 
-    async save(user: any) {
+    async signup(user: any) {
       if (user.email) {
         const count = await this.repository.count({ email: user.email });
         if (count > 0) {
@@ -43,6 +44,15 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
         }
       }
 
+      if (!user.password) {
+        throw new ReusableException(ExceptionCode.SHORT_PASSWORD);
+      }
+      user.password = await hash(user.password, 10);
+
+      return super.save(user);
+    }
+
+    async save(user: any) {
       if (user.password) {
         user.password = await hash(user.password, 10);
       } else if (user.password !== undefined) {
