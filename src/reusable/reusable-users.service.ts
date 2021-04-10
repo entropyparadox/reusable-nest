@@ -44,10 +44,12 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
         }
       }
 
-      if (!user.password) {
-        throw new ReusableException(ExceptionCode.SHORT_PASSWORD);
+      if (!user.kakaoId) {
+        if (!user.password) {
+          throw new ReusableException(ExceptionCode.SHORT_PASSWORD);
+        }
+        user.password = await hash(user.password, 10);
       }
-      user.password = await hash(user.password, 10);
 
       return super.save(user);
     }
