@@ -69,23 +69,32 @@ export class StorageService {
       .promise();
   }
 
-  async add(path: string, file: File | FileUpload) {
+  generateKey(path: string, filename: string) {
+    return `${path}/${Date.now()}_${filename}`;
+  }
+
+  add(path: string, file: File | FileUpload) {
     let filename = file instanceof File ? file.name : file.filename;
     // filename = filename.replace(/[^0-9a-zA-Z.]/g, '_');
-    const key = `${path}/${Date.now()}_${filename}`;
+    const key = this.generateKey(path, filename);
     return this.upload(key, file);
   }
 
-  async replace(key: string, file: File | FileUpload) {
+  replace(key: string, file: File | FileUpload) {
     return this.upload(key, file);
   }
 
   getPreSignedUrl(key: string) {
-    const params = {
+    return this.s3.getSignedUrlPromise('getObject', {
       Bucket: this.bucketName,
       Key: key,
-      Expires: 60 * 60, // 1 hour
-    };
-    return this.s3.getSignedUrlPromise('getObject', params);
+    });
+  }
+
+  getUploadUrl(key: string) {
+    return this.s3.getSignedUrlPromise('putObject', {
+      Bucket: this.bucketName,
+      Key: key,
+    });
   }
 }
