@@ -39,7 +39,7 @@ export class StorageService {
     );
   }
 
-  private async upload(key: string, file: File | FileUpload) {
+  private async upload(key: string, file: File | FileUpload, acl: string) {
     const fileType = file instanceof File ? file.type : file.mimetype;
     let fileBuffer = file instanceof File ? file.body : file.createReadStream();
     if (fileType.includes('image')) {
@@ -65,6 +65,7 @@ export class StorageService {
         Body: fileBuffer,
         ContentType: fileType,
         ContentEncoding: file instanceof File ? file.encoding : undefined,
+        ACL: acl,
       })
       .promise();
   }
@@ -77,11 +78,22 @@ export class StorageService {
     let filename = file instanceof File ? file.name : file.filename;
     // filename = filename.replace(/[^0-9a-zA-Z.]/g, '_');
     const key = this.generateKey(path, filename);
-    return this.upload(key, file);
+    return this.upload(key, file, 'private');
+  }
+
+  addToPublic(path: string, file: File | FileUpload) {
+    let filename = file instanceof File ? file.name : file.filename;
+    // filename = filename.replace(/[^0-9a-zA-Z.]/g, '_');
+    const key = this.generateKey(path, filename);
+    return this.upload(key, file, 'public-read');
   }
 
   replace(key: string, file: File | FileUpload) {
-    return this.upload(key, file);
+    return this.upload(key, file, 'private');
+  }
+
+  replaceToPublic(key: string, file: File | FileUpload) {
+    return this.upload(key, file, 'public-read');
   }
 
   getPreSignedUrl(key: string) {
