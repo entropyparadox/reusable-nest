@@ -1,3 +1,4 @@
+export * from './agora.service';
 export * from './base-model.entity';
 export * from './bizm.service';
 export * from './reusable-users.resolver';
