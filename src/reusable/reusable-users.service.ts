@@ -1,4 +1,4 @@
-import { Type } from '@nestjs/common';
+import { HttpException, HttpStatus, Type } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { DeepPartial } from 'typeorm';
 import { IAuthUser } from '../auth';
@@ -13,6 +13,56 @@ export interface IReusableUsersService<Entity>
   signup(user: DeepPartial<Entity>): Promise<Entity>;
   save(user: DeepPartial<Entity>): Promise<Entity>;
 }
+
+export function RestReusableUsersService<Entity extends IAuthUser<any>>(
+  entity: Type<Entity>,
+): Type<IReusableUsersService<Entity>> {
+  class RestReusableUsersServiceHost
+    extends RestReusableUsersService(entity)
+    implements IReusableUsersService<Entity> {
+    findByEmail(email: string) {
+      return this.repository.findOne({ where: { email } });
+    }
+
+    findByEmailIncludingPassword(email: string) {
+      return this.repository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where('user.email = :email', { email })
+        .getOne();
+    }
+
+    async signup(user: any) {
+      if (user.email) {
+        const count = await this.repository.count({ email: user.email });
+        if (count > 0) {
+          throw new HttpException(
+            {
+              status: HttpStatus.BAD_REQUEST,
+              error: '이미 가입한 이메일 입니다.',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
+      if (!user.password) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            error: '비밀번호가 너무 짧습니다.',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      user.password = await hash(user.password, 10);
+
+      return this.repository.save(user);
+    }
+  }
+  return RestReusableUsersServiceHost;
+}
+
 
 export function ReusableUsersService<Entity extends IAuthUser<any>>(
   entity: Type<Entity>,
