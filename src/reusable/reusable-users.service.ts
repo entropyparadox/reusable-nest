@@ -14,12 +14,20 @@ export interface IReusableUsersService<Entity>
   save(user: DeepPartial<Entity>): Promise<Entity>;
 }
 
+export interface IRestReusableUsersService<Entity>
+  extends IReusableService<Entity> {
+  findByEmail(email: string): Promise<Entity | undefined>;
+  findByEmailIncludingPassword(email: string): Promise<Entity | undefined>;
+  signup(user: DeepPartial<Entity>): Promise<Entity>;
+  save(user: DeepPartial<Entity>): Promise<Entity>;
+}
+
 export function RestReusableUsersService<Entity extends IAuthUser<any>>(
   entity: Type<Entity>,
-): Type<IReusableUsersService<Entity>> {
+): Type<IRestReusableUsersService<Entity>> {
   class RestReusableUsersServiceHost
-    extends RestReusableUsersService(entity)
-    implements IReusableUsersService<Entity> {
+    extends ReusableService(entity)
+    implements IRestReusableUsersService<Entity> {
     findByEmail(email: string) {
       return this.repository.findOne({ where: { email } });
     }
