@@ -7,10 +7,6 @@ import { IReusableUsersService } from '../reusable';
 import axios from 'axios';
 import { ExceptionCode, ReusableException } from '../exception';
 
-export class RestAuthResponse {
-  token?: string;
-}
-
 @ObjectType()
 export class AuthResponse {
   @Field(() => String, { nullable: true })
@@ -18,26 +14,6 @@ export class AuthResponse {
 
   @Field(() => Int, { nullable: true })
   kakaoId?: number;
-}
-
-
-@Injectable()
-export class RestAuthService {
-  constructor(
-    @Inject(Provider.USERS_SERVICE)
-    private usersService: IReusableUsersService<IAuthUser<any>>,
-    private jwtService: JwtService,
-  ) {}
-
-  async signup(user:any): Promise<RestAuthResponse> {
-    const {id} = await this.usersService.signup(user);
-    return this.login(id);
-  }
-
-  async login(userId: number): Promise<RestAuthResponse> {
-    const payload = {sub: userId};
-    return {token: this.jwtService.sign(payload)};
-  }
 }
 
 @Injectable()
