@@ -1,4 +1,4 @@
-import { Type } from '@nestjs/common';
+import { HttpException, HttpStatus, Type } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { DeepPartial } from 'typeorm';
 import { IAuthUser } from '../auth';
