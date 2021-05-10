@@ -3,7 +3,7 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Provider } from '../enums';
-import { IReusableUsersService } from '../reusable';
+import { IReusableService, IReusableUsersService } from '../reusable';
 import { IAuthUser } from './auth-user.entity';
 import { AuthService, RestAuthService } from './auth.service';
 import { jwtConstants } from './constants';
@@ -17,7 +17,7 @@ import { RestJwtAuthGuard } from './rest-jwt-auth.guard';
 export class RestAuthModule {
   static register(
     usersModule: Type<any>,
-    usersService: Type<IReusableUsersService<IAuthUser<any>>>,
+    usersService: Type<IReusableService<IAuthUser<any>>>,
   ): DynamicModule {
     return {
       module: RestAuthModule,
