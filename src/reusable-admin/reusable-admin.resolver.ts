@@ -29,7 +29,7 @@ export interface IReusableAdminResolver<Service, Entity> {
 
 export function ReusableAdminResolver<
   Service extends IReusableService<Entity>,
-  Entity extends BaseModel
+  Entity extends BaseModel,
 >(
   reusableService: Type<Service>,
   entity: Type<Entity>,
@@ -39,7 +39,8 @@ export function ReusableAdminResolver<
 
   @Resolver()
   class ReusableAdminResolverHost
-    implements IReusableAdminResolver<Service, Entity> {
+    implements IReusableAdminResolver<Service, Entity>
+  {
     @Inject(reusableService) readonly service!: Service;
     @Inject(StorageService) readonly storageService!: StorageService;
 
@@ -94,7 +95,13 @@ export function ReusableAdminResolver<
       } = JSON.parse(params);
       const where = Object.entries(filter).reduce(
         (acc, [key, value]) => {
-          if (typeof value === 'string') {
+          if (key === 'start_gte') {
+            acc.startedAt = MoreThanOrEqual(value);
+          } else if (key === 'start_lte') {
+            acc.startedAt = LessThanOrEqual(value);
+          } else if (Array.isArray(value)) {
+            acc[key] = In(value);
+          } else if (typeof value === 'string') {
             acc[key] = ILike(`%${value}%`);
           } else {
             acc[key] = value;
