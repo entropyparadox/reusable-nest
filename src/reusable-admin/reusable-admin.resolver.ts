@@ -2,7 +2,7 @@ import { Inject, Type } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { camelCase, kebabCase } from 'lodash';
 import { plural } from 'pluralize';
-import { ILike, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Between, ILike, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Roles } from '../auth';
 import { BaseRole } from '../auth/auth.enum';
 import { BaseModel } from '../reusable/base-model.entity';
@@ -61,9 +61,13 @@ export function ReusableAdminResolver<
       } = JSON.parse(params);
       const where = Object.entries(filter).reduce((acc, [key, value]) => {
         if (key === 'start_gte') {
-          acc.startedAt = MoreThanOrEqual(value);
+          acc.startedAt = MoreThanOrEqual(value).value;
         } else if (key === 'start_lte') {
-          acc.startedAt = LessThanOrEqual(value);
+          if (acc.startedAt) {
+            acc.startedAt = Between(acc.startedAt.value, value);
+          } else {
+            acc.startedAt = LessThanOrEqual(value);
+          }
         } else if (Array.isArray(value)) {
           acc[key] = In(value);
           // } else if (typeof value === 'string') {
@@ -98,7 +102,11 @@ export function ReusableAdminResolver<
           if (key === 'start_gte') {
             acc.startedAt = MoreThanOrEqual(value);
           } else if (key === 'start_lte') {
-            acc.startedAt = LessThanOrEqual(value);
+            if (acc.startedAt) {
+              acc.startedAt = Between(acc.startedAt.value, value);
+            } else {
+              acc.startedAt = LessThanOrEqual(value);
+            }
           } else if (Array.isArray(value)) {
             acc[key] = In(value);
           } else if (typeof value === 'string') {
