@@ -16,8 +16,8 @@ export class AuthResponse {
   @Field(() => Int, { nullable: true })
   kakaoId?: number;
 
-  @Field(() => Int, { nullable: true })
-  appleId?: number;
+  @Field(() => String, { nullable: true })
+  appleId?: string;
 }
 
 @Injectable()
