@@ -19,7 +19,7 @@ export interface IReusableUsersResolver<Service, Entity>
 
 export function ReusableUsersResolver<
   Service extends IReusableService<Entity>,
-  Entity extends BaseModel
+  Entity extends BaseModel,
 >(
   reusableService: Type<Service>,
   entity: Type<Entity>,
@@ -46,6 +46,12 @@ export function ReusableUsersResolver<
     @Mutation(() => AuthResponse)
     loginWithKakao(@Args('accessToken') accessToken: string) {
       return this.authService.loginWithKakao(accessToken);
+    }
+
+    @Public()
+    @Mutation(() => AuthResponse)
+    loginWithApple(@Args('identityToken') identityToken: string) {
+      return this.authService.loginWithApple(identityToken);
     }
 
     @Query(() => entity)

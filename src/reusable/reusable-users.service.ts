@@ -10,6 +10,7 @@ export interface IReusableUsersService<Entity>
   findByEmail(email: string): Promise<Entity | undefined>;
   findByEmailIncludingPassword(email: string): Promise<Entity | undefined>;
   findByKakaoId(kakaoId: string): Promise<Entity | undefined>;
+  findByAppleId(appleId: string): Promise<Entity | undefined>;
   signup(user: DeepPartial<Entity>): Promise<Entity>;
   save(user: DeepPartial<Entity>): Promise<Entity>;
 }
@@ -19,7 +20,8 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
 ): Type<IReusableUsersService<Entity>> {
   class ReusableUsersServiceHost
     extends ReusableService(entity)
-    implements IReusableUsersService<Entity> {
+    implements IReusableUsersService<Entity>
+  {
     findByEmail(email: string) {
       return this.repository.findOne({ where: { email } });
     }
@@ -34,6 +36,10 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
 
     findByKakaoId(kakaoId: string) {
       return this.repository.findOne({ where: { kakaoId } });
+    }
+
+    findByAppleId(appleId: string) {
+      return this.repository.findOne({ where: { appleId } });
     }
 
     async signup(user: any) {

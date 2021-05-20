@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
+import appleSignin from 'apple-signin-auth';
 import { Provider } from '../enums';
 import { IAuthUser } from './auth-user.entity';
 import { IReusableUsersService } from '../reusable';
@@ -14,6 +15,9 @@ export class AuthResponse {
 
   @Field(() => Int, { nullable: true })
   kakaoId?: number;
+
+  @Field(() => Int, { nullable: true })
+  appleId?: number;
 }
 
 @Injectable()
@@ -43,9 +47,16 @@ export class AuthService {
       throw new ReusableException(ExceptionCode.LOGIN_FAILED);
     }
     const user = await this.usersService.findByKakaoId(data.id);
-    if (user) {
-      return this.login(user.id);
+    return user ? this.login(user.id) : { kakaoId: data.id };
+  }
+
+  async loginWithApple(identityToken: string) {
+    try {
+      const { sub } = await appleSignin.verifyIdToken(identityToken);
+      const user = await this.usersService.findByAppleId(sub);
+      return user ? this.login(user.id) : { appleId: sub };
+    } catch (error) {
+      throw new ReusableException(ExceptionCode.LOGIN_FAILED);
     }
-    return { kakaoId: data.id };
   }
 }
