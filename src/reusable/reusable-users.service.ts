@@ -50,7 +50,7 @@ export function ReusableUsersService<Entity extends IAuthUser<any>>(
         }
       }
 
-      if (!user.kakaoId) {
+      if (!user.kakaoId && !user.appleId) {
         if (!user.password) {
           throw new ReusableException(ExceptionCode.SHORT_PASSWORD);
         }
